@@ -1,0 +1,107 @@
+type AuctionConfigUpdated @entity {
+  id: ID!
+  nexBidPercentInBasisPoint: BigInt! # uint256
+  extensionDuration: BigInt! # uint256
+}
+
+type AuctionFinalized @entity {
+  id: ID!
+  saleId: BigInt! # uint256
+  seller: Bytes! # address
+  bidder: Bytes! # address
+  royalty: BigInt! # uint256
+  marketFee: BigInt! # uint256
+  ownerRev: BigInt! # uint256
+}
+
+type BidPlaced @entity {
+  id: ID!
+  saleId: BigInt! # uint256
+  bidder: Bytes! # address
+  bidAbount: BigInt! # uint256
+  endTime: BigInt! # uint256
+}
+
+type ContractBidTokenUpdated @entity {
+  id: ID!
+  contractAddress: Bytes! # address
+  bidToken: Bytes! # address
+}
+
+type FixedPriceFinalized @entity {
+  id: ID!
+  saleId: BigInt! # uint256
+  seller: Bytes! # address
+  buyer: Bytes! # address
+  royalty: BigInt! # uint256
+  marketFee: BigInt! # uint256
+  ownerRev: BigInt! # uint256
+}
+
+type Initialized @entity {
+  id: ID!
+  version: Int! # uint8
+}
+
+type MarketFeesUpdated @entity {
+  id: ID!
+  marketFeeBps: BigInt! # uint256
+}
+
+type MarketRoyaltyUpdated @entity {
+  id: ID!
+  maxRoyaltiyBps: BigInt! # uint256
+}
+
+type OfferFinalized @entity {
+  id: ID!
+  saleId: BigInt! # uint256
+  seller: Bytes! # address
+  buyer: Bytes! # address
+  royalty: BigInt! # uint256
+  marketFee: BigInt! # uint256
+  ownerRev: BigInt! # uint256
+}
+
+type RoleAdminChanged @entity {
+  id: ID!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+}
+
+type RoleGranted @entity {
+  id: ID!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+}
+
+type RoleRevoked @entity {
+  id: ID!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+}
+
+type SaleCanceled @entity {
+  id: ID!
+  saleId: BigInt! # uint256
+  reason: String! # string
+}
+
+type SaleCreated @entity {
+  id: ID!
+  saleId: BigInt! # uint256
+  saleType: Int! # uint8
+  seller: Bytes! # address
+  contractAddress: Bytes! # address
+  tokenIds: [BigInt]! # uint256[]
+  values: [BigInt]! # uint256[]
+  bidToken: Bytes! # address
+  startTime: BigInt! # uint256
+  duration: BigInt! # uint256
+  extensionDuration: BigInt! # uint256
+  endTime: BigInt! # uint256
+  minPrice: BigInt! # uint256
+}

@@ -1,0 +1,62 @@
+specVersion: 0.0.1
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Marketplace
+    network: avalanche
+    source:
+      address: "0x5202e45EbA7F58E350AA58B59dEB64a668654007"
+      abi: Marketplace
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - AuctionConfigUpdated
+        - AuctionFinalized
+        - BidPlaced
+        - ContractBidTokenUpdated
+        - FixedPriceFinalized
+        - Initialized
+        - MarketFeesUpdated
+        - MarketRoyaltyUpdated
+        - OfferFinalized
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - SaleCanceled
+        - SaleCreated
+      abis:
+        - name: Marketplace
+          file: ./abis/Marketplace.json
+      eventHandlers:
+        - event: AuctionConfigUpdated(uint256,uint256)
+          handler: handleAuctionConfigUpdated
+        - event: AuctionFinalized(indexed uint256,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleAuctionFinalized
+        - event: BidPlaced(indexed uint256,address,uint256,uint256)
+          handler: handleBidPlaced
+        - event: ContractBidTokenUpdated(indexed address,indexed address)
+          handler: handleContractBidTokenUpdated
+        - event: FixedPriceFinalized(indexed uint256,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleFixedPriceFinalized
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: MarketFeesUpdated(indexed uint256)
+          handler: handleMarketFeesUpdated
+        - event: MarketRoyaltyUpdated(indexed uint256)
+          handler: handleMarketRoyaltyUpdated
+        - event: OfferFinalized(indexed uint256,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleOfferFinalized
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: SaleCanceled(indexed uint256,string)
+          handler: handleSaleCanceled
+        - event: SaleCreated(indexed uint256,uint8,indexed address,indexed address,uint256[],uint256[],address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleSaleCreated
+      file: ./src/marketplace.ts
