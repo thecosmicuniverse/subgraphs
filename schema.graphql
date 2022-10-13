@@ -11,7 +11,6 @@ enum TokenType {
 
 type User @entity {
   id: Bytes!
-
 }
 
 type Config @entity {
@@ -31,40 +30,42 @@ type BidToken @entity {
 }
 
 type ContractBidToken @entity {
-  id: Bytes!
+  id: String!
   contract: Contract!
   bidToken: BidToken!
+  timestamp: BigInt!
 }
 
 type FinalizedSaleDetails @entity {
-  id: Bytes!
+  id: String!
   royalty: BigInt!
   marketFee: BigInt!
   ownerRev: BigInt!
   sale: Sale!
+  timestamp: BigInt!
 }
 
 type Bid @entity {
-  id: Bytes!
+  id: String!
   bidder: User!
   bidAmount: BigInt!
   endTime: BigInt!
   sale: Sale!
+  timestamp: BigInt!
 }
 
 type Cancellation @entity {
-  id: Bytes!
+  id: String!
   reason: String!
   timestamp: BigInt!
   sale: Sale!
 }
 type Sale @entity {
-  id: Bytes!
+  id: String!
   saleId: BigInt! # uint256
   saleType: SaleType! # uint8
   seller: User # address
   contract: Contract! # address
-  tokenType: TokenType! # uint8
   tokenIds: [BigInt!]! # uint256[]
   values: [BigInt!]! # uint256[]
   bidToken: BidToken! # address
@@ -74,6 +75,6 @@ type Sale @entity {
   endTime: BigInt! # uint256
   minPrice: BigInt! # uint256
   bids: [Bid!] @derivedFrom(field: "sale")
-  finalizedSaleDetails: FinalizedSaleDetails
+  finalizedSaleDetails: FinalizedSaleDetails @derivedFrom(field: "sale")
 }
 

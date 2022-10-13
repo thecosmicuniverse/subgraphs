@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes } from '@graphprotocol/graph-ts';
 import {
   AuctionConfigUpdated as AuctionConfigUpdatedEvent,
   AuctionFinalized as AuctionFinalizedEvent,
@@ -9,23 +9,22 @@ import {
   MarketFeesUpdated as MarketFeesUpdatedEvent,
   MarketRoyaltyUpdated as MarketRoyaltyUpdatedEvent,
   OfferFinalized as OfferFinalizedEvent,
-  RoleAdminChanged as RoleAdminChangedEvent,
-  RoleGranted as RoleGrantedEvent,
-  RoleRevoked as RoleRevokedEvent,
-  SaleCanceled as SaleCanceledEvent, SaleCreated,
+  SaleCanceled as SaleCanceledEvent,
   SaleCreated as SaleCreatedEvent,
 } from '../generated/Marketplace/Marketplace';
 import {
   Sale,
   Config,
   Bid,
-  User,
   Cancellation,
   Contract,
   BidToken,
   ContractBidToken,
   FinalizedSaleDetails,
 } from "../generated/schema"
+import { handleCreateBidToken, handleCreateContract, handleCreateUser } from './helpers';
+
+
 
 export function handleAuctionConfigUpdated(event: AuctionConfigUpdatedEvent): void {
   let entity = Config.load(event.address)
@@ -40,25 +39,26 @@ export function handleAuctionConfigUpdated(event: AuctionConfigUpdatedEvent): vo
 }
 
 export function handleAuctionFinalized(event: AuctionFinalizedEvent): void {
-  let id = Bytes.fromHexString(event.params.saleId.toHex() + '-' + event.params.seller.toHex());
-  let entity =  new FinalizedSaleDetails(id)
+  let entity =  new FinalizedSaleDetails(event.params.saleId.toString())
   entity.royalty = event.params.royalty
   entity.marketFee = event.params.marketFee
   entity.ownerRev = event.params.ownerRev
+  entity.sale = event.params.saleId.toString()
   entity.save()
 }
 
 export function handleBidPlaced(event: BidPlacedEvent): void {
-  let entity = new Bid(Bytes.fromHexString(event.params.saleId.toHex() + '-' + event.params.bidder.toHex()))
-  entity.sale = Bytes.fromHexString(event.params.saleId.toHex())
-  entity.bidder = event.params.bidder
+  let entity = new Bid(event.params.saleId.toString() + '-' + event.params.bidder.toHex())
+  entity.sale = event.params.saleId.toString();
+  entity.bidder = handleCreateUser(event.params.bidder)
   entity.bidAmount = event.params.bidAbount
   entity.endTime = event.params.endTime
+  entity.timestamp = event.block.timestamp
   entity.save()
 }
 
 export function handleContractBidTokenUpdated(event: ContractBidTokenUpdatedEvent): void {
-  let id = Bytes.fromHexString(event.params.contractAddress.toHex() + '-' + event.params.bidToken.toHex())
+  let id = event.params.contractAddress.toHex() + '-' + event.params.bidToken.toHex()
   let entity = ContractBidToken.load(id)
   if (entity == null) {
     entity = new ContractBidToken(id)
@@ -75,18 +75,19 @@ export function handleContractBidTokenUpdated(event: ContractBidTokenUpdatedEven
     bidToken = new BidToken(event.params.bidToken)
     bidToken.save()
   }
-  entity.contract = event.params.contractAddress
-  entity.bidToken = event.params.bidToken
-
+  entity.contract = handleCreateContract(event.params.contractAddress);
+  entity.bidToken = handleCreateBidToken(event.params.bidToken);
+  entity.timestamp = event.block.timestamp
   entity.save()
 }
 
 export function handleFixedPriceFinalized(event: FixedPriceFinalizedEvent): void {
-  let id = Bytes.fromHexString(event.params.saleId.toHex() + '-' + event.params.seller.toHex());
-  let entity =  new FinalizedSaleDetails(id)
+  let entity =  new FinalizedSaleDetails(event.params.saleId.toString())
   entity.royalty = event.params.royalty
   entity.marketFee = event.params.marketFee
   entity.ownerRev = event.params.ownerRev
+  entity.timestamp = event.block.timestamp
+  entity.sale = event.params.saleId.toString();
   entity.save()
 }
 
@@ -111,32 +112,32 @@ export function handleMarketRoyaltyUpdated(event: MarketRoyaltyUpdatedEvent): vo
 }
 
 export function handleOfferFinalized(event: OfferFinalizedEvent): void {
-  let id = Bytes.fromHexString(event.params.saleId.toHex() + '-' + event.params.seller.toHex());
-  let entity =  new FinalizedSaleDetails(id)
+  let entity =  new FinalizedSaleDetails(event.params.saleId.toString())
   entity.royalty = event.params.royalty
   entity.marketFee = event.params.marketFee
   entity.ownerRev = event.params.ownerRev
+  entity.timestamp = event.block.timestamp
+  entity.sale = event.params.saleId.toString();
   entity.save()
 }
 
 export function handleSaleCanceled(event: SaleCanceledEvent): void {
-  let id = Bytes.fromHexString(event.params.saleId.toHex());
-  let entity = new Cancellation(id);
-  entity.sale = id;
+  let entity = new Cancellation(event.params.saleId.toString());
+  entity.sale = entity.id;
   entity.reason = event.params.reason
+  entity.timestamp = event.block.timestamp
   entity.save()
 }
 
 export function handleSaleCreated(event: SaleCreatedEvent): void {
-  let id = Bytes.fromHexString(event.params.saleId.toHex());
-  let entity = new Sale(id);
+  let entity = new Sale(event.params.saleId.toString());
   entity.saleId = event.params.saleId
   entity.saleType = event.params.saleType == 0 ? 'AUCTION' : event.params.saleType == 1 ? 'FIXED' : 'OFFER'
-  entity.seller = event.params.seller
-  entity.contract = event.params.contractAddress
+  entity.seller = handleCreateUser(event.params.seller)
+  entity.contract = handleCreateContract(event.params.contractAddress);
+  entity.bidToken = handleCreateBidToken(event.params.bidToken);
   entity.tokenIds = event.params.tokenIds
   entity.values = event.params.values
-  entity.bidToken = event.params.bidToken
   entity.startTime = event.params.startTime
   entity.duration = event.params.duration
   entity.extensionDuration = event.params.extensionDuration

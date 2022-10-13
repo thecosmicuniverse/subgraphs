@@ -1,15 +1,16 @@
 specVersion: 0.0.4
 description: Marketplace for Cosmic Universe
-repository: https://github.com/evoverses/subgraphs
+repository: https://github.com/thecosmicuniverse/subgraphs
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: Marketplace
+    name: thecosmicuniverse/marketplace
     network: avalanche
     source:
       address: "0x5202e45EbA7F58E350AA58B59dEB64a668654007"
       abi: Marketplace
+      startBlock: 17011203
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -24,9 +25,6 @@ dataSources:
         - MarketFeesUpdated
         - MarketRoyaltyUpdated
         - OfferFinalized
-        - RoleAdminChanged
-        - RoleGranted
-        - RoleRevoked
         - SaleCanceled
         - SaleCreated
       abis:
@@ -51,12 +49,6 @@ dataSources:
           handler: handleMarketRoyaltyUpdated
         - event: OfferFinalized(indexed uint256,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleOfferFinalized
-        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
-          handler: handleRoleAdminChanged
-        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleGranted
-        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleRevoked
         - event: SaleCanceled(indexed uint256,string)
           handler: handleSaleCanceled
         - event: SaleCreated(indexed uint256,uint8,indexed address,indexed address,uint256[],uint256[],address,uint256,uint256,uint256,uint256,uint256)
