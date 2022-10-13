@@ -1,107 +1,79 @@
-type AuctionConfigUpdated @entity {
-  id: ID!
-  nexBidPercentInBasisPoint: BigInt! # uint256
-  extensionDuration: BigInt! # uint256
+enum SaleType {
+  AUCTION,
+  FIXED,
+  OFFER
 }
 
-type AuctionFinalized @entity {
-  id: ID!
-  saleId: BigInt! # uint256
-  seller: Bytes! # address
-  bidder: Bytes! # address
-  royalty: BigInt! # uint256
-  marketFee: BigInt! # uint256
-  ownerRev: BigInt! # uint256
+enum TokenType {
+  ERC721,
+  ERC1155
 }
 
-type BidPlaced @entity {
-  id: ID!
-  saleId: BigInt! # uint256
-  bidder: Bytes! # address
-  bidAbount: BigInt! # uint256
-  endTime: BigInt! # uint256
+type User @entity {
+  id: Bytes!
+
 }
 
-type ContractBidTokenUpdated @entity {
-  id: ID!
-  contractAddress: Bytes! # address
-  bidToken: Bytes! # address
-}
-
-type FixedPriceFinalized @entity {
-  id: ID!
-  saleId: BigInt! # uint256
-  seller: Bytes! # address
-  buyer: Bytes! # address
-  royalty: BigInt! # uint256
-  marketFee: BigInt! # uint256
-  ownerRev: BigInt! # uint256
-}
-
-type Initialized @entity {
-  id: ID!
-  version: Int! # uint8
-}
-
-type MarketFeesUpdated @entity {
-  id: ID!
+type Config @entity {
+  id: Bytes!
   marketFeeBps: BigInt! # uint256
+  royaltyBps: BigInt! # uint256
+  nextBidPercentInBasisPoint: BigInt!
+  extensionDuration: BigInt!
 }
 
-type MarketRoyaltyUpdated @entity {
-  id: ID!
-  maxRoyaltiyBps: BigInt! # uint256
+type Contract @entity {
+  id: Bytes!
 }
 
-type OfferFinalized @entity {
-  id: ID!
+type BidToken @entity {
+  id: Bytes!
+}
+
+type ContractBidToken @entity {
+  id: Bytes!
+  contract: Contract!
+  bidToken: BidToken!
+}
+
+type FinalizedSaleDetails @entity {
+  id: Bytes!
+  royalty: BigInt!
+  marketFee: BigInt!
+  ownerRev: BigInt!
+  sale: Sale!
+}
+
+type Bid @entity {
+  id: Bytes!
+  bidder: User!
+  bidAmount: BigInt!
+  endTime: BigInt!
+  sale: Sale!
+}
+
+type Cancellation @entity {
+  id: Bytes!
+  reason: String!
+  timestamp: BigInt!
+  sale: Sale!
+}
+type Sale @entity {
+  id: Bytes!
   saleId: BigInt! # uint256
-  seller: Bytes! # address
-  buyer: Bytes! # address
-  royalty: BigInt! # uint256
-  marketFee: BigInt! # uint256
-  ownerRev: BigInt! # uint256
-}
-
-type RoleAdminChanged @entity {
-  id: ID!
-  role: Bytes! # bytes32
-  previousAdminRole: Bytes! # bytes32
-  newAdminRole: Bytes! # bytes32
-}
-
-type RoleGranted @entity {
-  id: ID!
-  role: Bytes! # bytes32
-  account: Bytes! # address
-  sender: Bytes! # address
-}
-
-type RoleRevoked @entity {
-  id: ID!
-  role: Bytes! # bytes32
-  account: Bytes! # address
-  sender: Bytes! # address
-}
-
-type SaleCanceled @entity {
-  id: ID!
-  saleId: BigInt! # uint256
-  reason: String! # string
-}
-
-type SaleCreated @entity {
-  id: ID!
-  saleId: BigInt! # uint256
-  saleType: Int! # uint8
-  seller: Bytes! # address
-  contractAddress: Bytes! # address
-  tokenIds: [BigInt]! # uint256[]
-  values: [BigInt]! # uint256[]
-  bidToken: Bytes! # address
+  saleType: SaleType! # uint8
+  seller: User # address
+  contract: Contract! # address
+  tokenType: TokenType! # uint8
+  tokenIds: [BigInt!]! # uint256[]
+  values: [BigInt!]! # uint256[]
+  bidToken: BidToken! # address
   startTime: BigInt! # uint256
   duration: BigInt! # uint256
   extensionDuration: BigInt! # uint256
   endTime: BigInt! # uint256
   minPrice: BigInt! # uint256
+  bids: [Bid!] @derivedFrom(field: "sale")
+  finalizedSaleDetails: FinalizedSaleDetails
 }
+
