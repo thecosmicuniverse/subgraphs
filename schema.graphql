@@ -1,80 +1,83 @@
-enum SaleType {
-  AUCTION,
-  FIXED,
-  OFFER
+# GraphQL core functionality
+scalar Boolean
+scalar ID
+scalar Int
+scalar Float
+scalar String
+
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+# The Graph extensions
+
+"Marks the GraphQL type as indexable entity.  Each type that should be an entity is required to be annotated with this directive."
+directive @entity on OBJECT
+
+"Defined a Subgraph ID for an object type"
+directive @subgraphId(id: String!) on OBJECT
+
+"creates a virtual field on the entity that may be queried but cannot be set manually through the mappings API."
+directive @derivedFrom(field: String!) on FIELD_DEFINITION
+
+scalar BigDecimal
+scalar Bytes
+scalar BigInt
+
+# The type names are purposely awkward to minimize the risk of them
+# colliding with user-supplied types
+"The type for the top-level _meta field"
+type _Meta_ {
+  """
+  Information about a specific subgraph block. The hash of the block
+  will be null if the _meta field has a block constraint that asks for
+  a block number. It will be filled if the _meta field has no block constraint
+  and therefore asks for the latest  block
+  """
+  block: _Block_!
+  "The deployment ID"
+  deployment: String!
+  "If `true`, the subgraph encountered indexing errors at some past block"
+  hasIndexingErrors: Boolean!
 }
 
-enum TokenType {
-  ERC721,
-  ERC1155
+input BlockChangedFilter {
+  number_gte: Int!
 }
 
-type User @entity {
-  id: Bytes!
+type _Block_ {
+  "The hash of the block"
+  hash: Bytes
+  "The block number"
+  number: Int!
+  "Integer representation of the timestamp stored in blocks for the chain"
+  timestamp: Int
 }
 
-type Config @entity {
-  id: Bytes!
-  marketFeeBps: BigInt! # uint256
-  royaltyBps: BigInt! # uint256
-  nextBidPercentInBasisPoint: BigInt!
-  extensionDuration: BigInt!
+enum _SubgraphErrorPolicy_ {
+  "Data will be returned even if the subgraph has indexing errors"
+  allow,
+
+  "If the subgraph has indexing errors, data will be omitted. The default."
+  deny
 }
 
-type Contract @entity {
-  id: Bytes!
+"The block at which the query should be executed."
+input Block_height {
+  "Value containing a block hash"
+  hash: Bytes
+  "Value containing a block number"
+  number: Int
+  """
+  Value containing the minimum block number.
+  In the case of `number_gte`, the query will be executed on the latest block only if
+  the subgraph has progressed to or past the minimum block number.
+  Defaults to the latest block when omitted.
+  """
+  number_gte: Int
 }
 
-type BidToken @entity {
-  id: Bytes!
+"Defines the order direction, either ascending or descending"
+enum OrderDirection {
+  asc
+  desc
 }
-
-type ContractBidToken @entity {
-  id: String!
-  contract: Contract!
-  bidToken: BidToken!
-  timestamp: BigInt!
-}
-
-type FinalizedSaleDetails @entity {
-  id: String!
-  royalty: BigInt!
-  marketFee: BigInt!
-  ownerRev: BigInt!
-  sale: Sale!
-  timestamp: BigInt!
-}
-
-type Bid @entity {
-  id: String!
-  bidder: User!
-  bidAmount: BigInt!
-  endTime: BigInt!
-  sale: Sale!
-  timestamp: BigInt!
-}
-
-type Cancellation @entity {
-  id: String!
-  reason: String!
-  timestamp: BigInt!
-  sale: Sale!
-}
-type Sale @entity {
-  id: String!
-  saleId: BigInt! # uint256
-  saleType: SaleType! # uint8
-  seller: User # address
-  contract: Contract! # address
-  tokenIds: [BigInt!]! # uint256[]
-  values: [BigInt!]! # uint256[]
-  bidToken: BidToken! # address
-  startTime: BigInt! # uint256
-  duration: BigInt! # uint256
-  extensionDuration: BigInt! # uint256
-  endTime: BigInt! # uint256
-  minPrice: BigInt! # uint256
-  bids: [Bid!] @derivedFrom(field: "sale")
-  finalizedSaleDetails: FinalizedSaleDetails @derivedFrom(field: "sale")
-}
-

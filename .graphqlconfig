@@ -1,0 +1,25 @@
+{
+  "name": "Cosmic Universe GraphQL",
+  "projects": {
+    "shared": {
+      "includes": ["shared/**"]
+    },
+    "nfts": {
+      "includes": ["nfts/**", "shared/**"]
+    },
+    "other": {
+      "includes": ["other/**", "shared/**"]
+    }
+  },
+  "extensions": {
+    "endpoints": {
+      "NFTs": {
+        "url": "https://api.thegraph.com/subgraphs/name/thecosmicuniverse/avalanche-nfts/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": false
+      }
+    }
+  }
+}
